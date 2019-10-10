@@ -1,5 +1,3 @@
-
-
 //登陆对象
 var ele_log = {
     name: document.getElementById("user_log"),
@@ -16,7 +14,7 @@ ele_log.password.onblur = function () {
 
 function checkName_log() {
     if (ele_log.name.value == "") {
-        document.getElementById("user_reminder_log").innerHTML = "请输入用户名 !";
+        document.getElementById("user_reminder_log").innerHTML = "请输入账号 !";
     } else {
         document.getElementById("user_reminder_log").innerHTML = "&nbsp;";
         return true;
@@ -49,29 +47,36 @@ function check_log() {
 
     var correct;
     if (nameok && passwordok) {
-        request.open("post", "log.php", true);
+        request.open("post", "logAndRegisterServer.php", true);
         request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         request.onreadystatechange = function () {
             if ((this.status >= 200 && this.status <= 300 || this.status == 304) && this.readyState == 4) {
                 correct = this.responseText;
                 if (correct == 'operator') {
                     window.location.href="home.php";
-                    alert("登陆成功");
+                    //alert("登陆成功");
                     return true;
 
-                } else if (correct=='master') {
-
-                    window.location.href = "analysis.php";
-                    alert("登陆成功");
+                } else if (correct == 'master') {
+                    window.location.href = "analysis/analysis.php";
+                    //alert("登陆成功");
                     return true;
+                } else if (correct == 'passwordWrong'){
+                    document.getElementById("password_reminder_log").innerHTML = "密码错误!";
+                    return false
+                } else if (correct == 'userNotFound'){
+                    document.getElementById("password_reminder_log").innerHTML = "账号不存在!";
+                    return false
                 } else {
-                    document.getElementById("password_reminder_log").innerHTML = "用户名或密码错误!";
+                    alert("log fail");
+                    alert(correct);
+                    document.getElementById("password_reminder_log").innerHTML = "未知错误!";
                     return false
                 }
 
             }
         };
-        var para = "username=" + ele_log.name.value + "&password=" + ele_log.password.value;
+        var para = "user_log=" + ele_log.name.value + "&pass_log=" + ele_log.password.value;
         request.send(para);
 
 
@@ -81,4 +86,3 @@ function check_log() {
         return false;
     }
 }
-

@@ -1,0 +1,26 @@
+.result{
+    border: solid silver 2px;
+    padding: 5px;
+    margin:10px 4%;
+
+
+
+}
+
+
+.search-bottom{
+    clear: both;
+
+}
+.result img{
+    width: 80%;
+    height: 80%;
+}
+#searchResult{
+    margin-top: 10px;
+}
+#searchBox{
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+

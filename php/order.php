@@ -1,199 +1,169 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>logIn</title>
-    <link rel="stylesheet" href="../css/reset.css">
-    <link href="../bootstrap-3.3.7-dist/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
-
-</head>
-<body style="overflow: hidden">
-
 <?php
-require_once 'config.php';
-$pdo = new PDO(DBCONNSTRING, DBUSER, DBPASS);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+include "template/nav.php";
+
 ?>
 
+<script>
+    document.getElementById("orderLi").className = "active";
+</script>
 
-<div class="panel panel-default col-md-8 col-md-offset-2 row "
-     style="margin-top: 20px;margin-bottom: 20px;max-height: 300px ;overflow-y: scroll ">
-
-    <div class="panel-heading row">
-        <p class="panel-title  col-md-4">已租赁订单： </p>
-        <div class="col-md-3 col-md-offset-9 input-group">
-            <input type="text" name="search" placeholder="Search..." id="renting_search" class="form-control"  onchange="set()">
-            <a href="order.php" class="input-group-addon" id="renting_search_link"> <span class="glyphicon glyphicon-search " ></span></a>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">订单查询</a>
+            </div>
+            <form class="navbar-form navbar-left" role="search" action="order.php" method="post" autocomplete="off">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="订单号" name="orderText" id="orderText">
+                </div>
+                <div class="form-group" style="margin-left: 20px; margin-right: 20px">
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosInline" id="optionsRadios3" value="all" checked> 全部
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosInline" id="optionsRadios4"  value="on"> 未完成
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosInline" id="optionsRadios4"  value="off"> 已完成
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-default">查询</button>
+            </form>
+            <form class="navbar-form navbar-right" action="newOrder.php" method="post">
+                <button type="submit" class="btn btn-default">定制下单</button>
+            </form>
         </div>
-    </div>
-    <table class="table table-hover panel-body table-responsive">
-        <thead>
-        <tr>
-            <td>订单号</td>
-            <td>衣服型号</td>
-            <td>客户名</td>
-            <td>客户微信</td>
-            <td>租赁时间</td>
-            <td>租赁费用</td>
-            <td>操作员</td>
-            <td>操作</td>
-        </tr>
-        </thead>
-        <?php
-        $sql = "SELECT * FROM rentorder  WHERE status='on' order by orderID desc ";
-        $result = $pdo->query($sql);
-        while ($row = $result->fetch()) {
-            echo "<tr>";
-            echo "<td>" . $row['orderID'] . "</td>";
-            echo "<td>";
-            $model = explode(',', $row['suitModel']);
-            for ($index = 0; $index < count($model); $index++) {
-                echo $model[$index] . " ";
+    </nav>
+
+<?php
+
+if(isset($_POST['orderText'])){
+    $orderText = $_POST['orderText'];
+    if(strlen($orderText) >= 2){
+        $mode = substr($orderText, 0,2);
+        if($mode == "RE" || $mode == "CU"){
+            $timeCommand = "" . substr($orderText, 2, strlen($orderText) - 2);
+            showResult($mode, $timeCommand, $_POST['optionsRadiosInline'], getConn());
+        }
+    }
+}
+
+function showResult($mode, $timeCommand, $status, $conn){
+    if($status == "all"){
+        showResult($mode, $timeCommand, "on", $conn);
+        showResult($mode, $timeCommand, "off", $conn);
+    }else{
+        $length = strlen($timeCommand);
+        if(($timeCommand == "") || ($length >= 4 && $length <= 10 && $length % 2 == 0 && is_numeric($timeCommand))){
+            $orderText = $mode . $timeCommand;
+            if($mode == "RE"){
+                $modeText = "rentorder";
+            }else{
+                $modeText = "customorder";
             }
-            echo "</td>";
-            echo "<td>" . $row['client'] . "</td>";
-            echo "<td>" . $row['weChat'] . "</td>";
-            echo "<td>" . $row['rentTime'] ."---".$row['returnTime']. "</td>";
-            echo "<td>" . $row['price'] . "</td>";
-            echo "<td>" . $row['operatorName'] . "</td>";
-            echo "<td><button type='button'  onclick='rentCancel()' class='btn btn-default' id='rentCancel'>取消</button></td>";
-            echo "  </tr>";
-        }
-        ?>
-    </table>
-</div>
-
-
-
-<div class="panel panel-default col-md-8 col-md-offset-2 row "
-     style="margin-top: 20px;margin-bottom: 20px;max-height: 300px ;overflow-y: scroll ">
-    <div class="panel-heading row">
-        <p class="panel-title  col-md-4">定制下单订单： </p>
-        <div class="col-md-3 col-md-offset-9 input-group">
-            <input type="text" name="search" placeholder="Search..." id="customing_search" class="form-control"  onchange="set()">
-            <a href="order.php" class="input-group-addon" id="customing_search_link"> <span class="glyphicon glyphicon-search "></span></a>
-        </div>
-    </div>
-    <table class="table table-hover panel-body table-responsive">
-        <thead>
-        <tr>
-            <td>订单号</td>
-            <td>客户名</td>
-            <td>客户微信</td>
-            <td>定制时间</td>
-            <td>定制费用</td>
-            <td>备注</td>
-            <td>操作员</td>
-            <td>操作</td>
-        </tr>
-        </thead>
-        <?php
-        $sql = "SELECT * FROM customorder WHERE status='on' order by orderID desc ";
-        $result = $pdo->query($sql);
-        while ($row = $result->fetch()) {
-            echo "<tr>";
-            echo "<td>" . $row['orderID'] . "</td>";
-            echo "<td>" . $row['client'] . "</td>";
-            echo "<td>" . $row['weChat'] . "</td>";
-            echo "<td>" . $row['customTime'] . "</td>";
-            echo "<td>" . $row['price'] . "</td>";
-            echo "<td>" . $row['note'] . "</td>";
-            echo "<td>" . $row['operatorName'] . "</td>";
-            echo "<td>
-                  <button type='button'  onclick='customCancel()' class='btn btn-default' id='rentCancel'>取消</button>
-                  <button type='button'  onclick='customComplete()' class='btn btn-default' id='rentCancel'>完成</button>
-                  </td>";
-            echo "</tr>";
-        }
-        ?>
-    </table>
-</div>
-
-
-<div class="panel panel-default col-md-8 col-md-offset-2 row "
-     style="margin-top: 20px;margin-bottom: 20px;max-height: 300px ;overflow-y: scroll ">
-    <div class="panel-heading row">
-        <p class="panel-title  col-md-4">租赁完成订单： </p>
-        <div class="col-md-3 col-md-offset-9 input-group">
-            <input type="text" name="search" placeholder="Search..." id="rented_search" class="form-control"  onchange="set()">
-            <a href="order.php" class="input-group-addon" id="rented_search_link"> <span class="glyphicon glyphicon-search " ></span></a>
-        </div>
-    </div>
-    <table class="table table-hover panel-body table-responsive">
-        <thead>
-        <tr>
-            <td>订单号</td>
-            <td>衣服型号</td>
-            <td>客户名</td>
-            <td>客户微信</td>
-            <td>租赁时间</td>
-
-            <td>租赁费用</td>
-            <td>操作员</td>
-        </tr>
-        </thead>
-        <?php
-        $sql = "SELECT * FROM rentorder WHERE status='off' order by orderID desc ";
-        $result = $pdo->query($sql);
-        while ($row = $result->fetch()) {
-            echo "<tr>";
-            echo "<td>" . $row['orderID'] . "</td>";
-            echo "<td>";
-            $model = explode(',', $row['suitModel']);
-            for ($index = 0; $index < count($model); $index++) {
-                echo $model[$index] . "  ";
+            $sql_orderSearch = "SELECT * FROM " . $modeText . " WHERE status = '" . $status . "' AND orderID LIKE '" . $orderText . "%'  ORDER BY orderTime DESC";
+            $orderArray = mysqli_query($conn, $sql_orderSearch);
+            if($mode == "RE"){
+                //echo "<script>alert('RE called!');</script>";
+                if($status == "on"){
+                    //echo "<script>alert('RE on called!');</script>";
+                    showRentOrders_statusOn($orderArray);
+                }else{
+                    //echo "<script>alert('RE off called!');</script>";
+                    showRentOrders_statusOff($orderArray);
+                }
+            }else{
+                if($status == "on"){
+                    showCustomOrders_statusOn($orderArray);
+                }else{
+                    showCustomOrders_statusOff($orderArray);
+                }
             }
-            echo "</td>";
-            echo "<td>" . $row['client'] . "</td>";
-            echo "<td>" . $row['weChat'] . "</td>";
-            echo "<td>" . $row['rentTime'] ."---".$row['returnTime']. "</td>";
-            echo "<td>" . $row['price'] . "</td>";
-            echo "<td>" . $row['operatorName'] . "</td>";
-            echo "  </tr>";
         }
-        ?>
-    </table>
-</div>
+    }
+}
 
+function showRentOrders_statusOn($rentOrderArray){
+    foreach ($rentOrderArray as $currentOrder){
+        echo "<div style='background: #f5f5f5; opacity: 0.75; border-radius: 5px; margin-top: 10px; padding: 4px;'>";
+        echo "<p>";
+        echo "<span> <strong> 订单号： </strong> " . $currentOrder['orderID'] . "</span><br>";
+        echo "<span> <strong> 衣服型号： </strong> " . $currentOrder['suitModel'] . "</span><br>";
+        echo "<span> <strong> 销售： </strong> " . $currentOrder['operatorName'] . "&nbsp&nbsp&nbsp&nbsp<strong> 金额：￥</strong> "
+            . $currentOrder['price'] . "&nbsp&nbsp&nbsp&nbsp<strong> 订单状态： </strong> 未完成 </span><br>";
+        echo "<span> <strong> 客户： </strong> " . $currentOrder['client'] . "&nbsp&nbsp&nbsp&nbsp<strong> 微信： </strong> " . $currentOrder['weChat']
+            . "</span><br>";
+        echo "<span> <strong> 租赁时间： </strong> " . $currentOrder['orderTime'] . "</span><br>";
+        echo "<span> <strong> 归还时间： </strong> " . $currentOrder['returnTime'] . "</span><br>";
+        echo "</p>";
+        echo "
+        <button type=\"button\" class=\"btn btn-default\" onclick=\"finishRentOrder(' " . $currentOrder['rentID'] . "')\">完成租赁订单</button>
+        <button type=\"button\" class=\"btn btn-default\" onclick=\"deleteRentOrder(' " . $currentOrder['rentID'] . "')\">删除租赁订单</button>
+        ";
+        echo "</div>";
+    }
+}
 
-<div class="panel panel-default col-md-8 col-md-offset-2 row "
-     style="margin-top: 20px;margin-bottom: 20px;max-height: 300px ;overflow-y: scroll ">
-    <div class="panel-heading row">
-        <p class="panel-title  col-md-4">定制完成订单： </p>
-        <div class="col-md-3 col-md-offset-9 input-group">
-            <input type="text" name="search" placeholder="Search..." id="customed_search" class="form-control"  onchange="set()">
-            <a href="order.php" class="input-group-addon" id="customed_search_link"> <span class="glyphicon glyphicon-search " ></span></a>
-        </div>
-    </div>
-    <table class="table table-hover panel-body table-responsive">
-        <thead>
-        <tr>
-            <td>订单号</td>
-            <td>客户名</td>
-            <td>客户微信</td>
-            <td>定制时间</td>
-            <td>取衣时间</td>
-            <td>定制费用</td>
-            <td>操作员</td>
+function showRentOrders_statusOff($rentOrderArray){
+    foreach ($rentOrderArray as $currentOrder){
+        echo "<div style='background: #f5f5f5; opacity: 0.75; border-radius: 5px; margin-top: 10px; padding: 4px;'>";
+            echo "<p>";
+                echo "<span> <strong> 订单号： </strong> " . $currentOrder['orderID'] . "</span><br>";
+                echo "<span> <strong> 衣服型号： </strong> " . $currentOrder['suitModel'] . "</span><br>";
+                echo "<span> <strong> 销售： </strong> " . $currentOrder['operatorName'] . "&nbsp&nbsp&nbsp&nbsp<strong> 金额：￥</strong> "
+                    . $currentOrder['price'] . "&nbsp&nbsp&nbsp&nbsp<strong> 订单状态： </strong> 已完成 </span><br>";
+                echo "<span> <strong> 客户： </strong> " . $currentOrder['client'] . "&nbsp&nbsp&nbsp&nbsp<strong> 微信： </strong> " . $currentOrder['weChat']
+                    . "</span><br>";
+                echo "<span> <strong> 租赁时间： </strong> " . $currentOrder['orderTime'] . "</span><br>";
+                echo "<span> <strong> 归还时间： </strong> " . $currentOrder['returnTime'] . "</span><br>";
+            echo "</p>";
+        echo "</div>";
+    }
+}
 
-        </tr>
-        </thead>
-        <?php
-        $sql = "SELECT * FROM customorder WHERE status='off' order by orderID desc ";
-        $result = $pdo->query($sql);
-        while ($row = $result->fetch()) {
-            echo "<tr>";
-            echo "<td>" . $row['orderID'] . "</td>";
-            echo "<td>" . $row['client'] . "</td>";
-            echo "<td>" . $row['weChat'] . "</td>";
-            echo "<td>" . $row['customTime'] . "</td>";
-            echo "<td>" . $row['fetchTime'] . "</td>";
-            echo "<td>" . $row['price'] . "</td>";
-            echo "<td>" . $row['operatorName'] . "</td>";
-            echo "</tr>";
-        }
-        ?>
-    </table>
-</div>
+function showCustomOrders_statusOn($customOrderArray){
+    foreach ($customOrderArray as $currentOrder){
+        echo "<div style='background: #f5f5f5; opacity: 0.75; border-radius: 5px; margin-top: 10px; padding: 4px;'>";
+        echo "<p>";
+        echo "<span> <strong> 订单号： </strong> " . $currentOrder['orderID'] . "</span><br>";
+        echo "<span> <strong> 销售： </strong> " . $currentOrder['operatorName'] . "&nbsp&nbsp&nbsp&nbsp<strong> 金额：￥</strong> "
+            . $currentOrder['price'] . "&nbsp&nbsp&nbsp&nbsp<strong> 订单状态： </strong> 未完成 </span><br>";
+        echo "<span> <strong> 客户： </strong> " . $currentOrder['client'] . "&nbsp&nbsp&nbsp&nbsp<strong> 微信： </strong> " . $currentOrder['weChat']
+            . "</span><br>";
+        echo "<span> <strong> 备注： </strong> " . $currentOrder['note'] . "</span><br>";
+        echo "<span> <strong> 下单时间： </strong> " . $currentOrder['orderTime'] . "</span><br>";
+        echo "<span> <strong> 取衣时间： </strong> " . $currentOrder['fetchTime'] . "</span><br>";
+        echo "</p>";
+        echo "
+        <button type=\"button\" class=\"btn btn-default\" onclick=\"finishCustomOrder(' " . $currentOrder['customID'] . "')\">完成定制订单</button>
+        <button type=\"button\" class=\"btn btn-default\" onclick=\"deleteCustomOrder(' " . $currentOrder['customID'] . "')\">删除定制订单</button>
+        ";
+        echo "</div>";
+    }
+}
 
-</body>
+function showCustomOrders_statusOff($customOrderArray){
+    foreach ($customOrderArray as $currentOrder){
+        echo "<div style='background: #f5f5f5; opacity: 0.75; border-radius: 5px; margin-top: 10px; padding: 4px;'>";
+        echo "<p>";
+        echo "<span> <strong> 订单号： </strong> " . $currentOrder['orderID'] . "</span><br>";
+        echo "<span> <strong> 销售： </strong> " . $currentOrder['operatorName'] . "&nbsp&nbsp&nbsp&nbsp<strong> 金额：￥</strong> "
+            . $currentOrder['price'] . "&nbsp&nbsp&nbsp&nbsp<strong> 订单状态： </strong> 已完成 </span><br>";
+        echo "<span> <strong> 客户： </strong> " . $currentOrder['client'] . "&nbsp&nbsp&nbsp&nbsp<strong> 微信： </strong> " . $currentOrder['weChat']
+            . "</span><br>";
+        echo "<span> <strong> 备注： </strong> " . $currentOrder['note'] . "</span><br>";
+        echo "<span> <strong> 下单时间： </strong> " . $currentOrder['orderTime'] . "</span><br>";
+        echo "<span> <strong> 取衣时间： </strong> " . $currentOrder['fetchTime'] . "</span><br>";
+        echo "</p>";
+        echo "</div>";
+    }
+}
+
+?>
+    <script src="../js/order.js"></script>
+<?php
+
+include "template/foot.php";
+
+?>
