@@ -93,7 +93,32 @@ $(document).ready(function(){
     getPageBar();
 });
 
+$(".deleteSuitBtn").click(function () {
+ if( confirm("你确定要删除这件衣服吗？")){
+ var   request=new XMLHttpRequest();
+     var id=this.getAttribute('id');
+     request.open("post", "cartHandle.php", true);
+     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+     request.onreadystatechange = function () {
+         if ((this.status >= 200 && this.status <= 300 || this.status == 304) && this.readyState == 4) {
+             if (this.responseText === "success") {
+                 alert("删除成功")
+             }
 
+             if (this.responseText === "false") {
+                 alert("操作失败，请刷新后再试");
+             }
+             window.location.reload();
+         }
+     };
+     var para = "deleteSuit="+id;
+     request.send(para);
+     request=null;
+
+
+
+ }
+});
 
 
 $(".returnBtn").click(function () {

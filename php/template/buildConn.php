@@ -1,8 +1,8 @@
 <?php
 date_default_timezone_set("Asia/Shanghai");
 function getConn(){
-    @$conn = mysqli_connect('localhost', 'coolboy',
-        'test1234', 'omen');
+    @$conn = mysqli_connect('localhost', 'root',
+        'root', 'omen');
     return $conn;
 }
 

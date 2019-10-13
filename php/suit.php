@@ -153,7 +153,8 @@ include "template/nav.php";
                 if ($row['status']=='on') {
                     echo "待出租</p>";
                     echo "<input type='button' value='租赁' id='".$row['suitID']."' class='btn btn-default rentBtn'>  ";
-
+                    if ($_SESSION['account']=='master')
+                    echo "<input type='button' value='删除' id='".$row['suitID']."' class='btn btn-default deleteSuitBtn'>  ";
                 }
                 else {
                     echo $row['rentTime'] . " 租出</p>";

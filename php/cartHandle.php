@@ -35,6 +35,18 @@ try {
         $pdo = null;
     }
 
+    if (isset($_POST['deleteSuit'])) {
+        $sql = "DELETE   FROM suit WHERE suitID='{$_POST['deleteSuit']}' ";
+        $result = $pdo->query($sql);
+        if ($row = $result->fetch()) {
+                echo "success";
+            } else {
+                echo 'failed';
+            }
+        }else echo "false";
+        $pdo = null;
+
+
 } catch (PDOException $exception) {
     die($exception->getMessage());
 }

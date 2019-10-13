@@ -45,6 +45,8 @@ if(isset($_POST['orderText'])){
         if($mode == "RE" || $mode == "CU"){
             $timeCommand = "" . substr($orderText, 2, strlen($orderText) - 2);
             showResult($mode, $timeCommand, $_POST['optionsRadiosInline'], getConn());
+        }else{
+            showResult("", $orderText, $_POST['optionsRadiosInline'], getConn());
         }
     }
 }
@@ -59,10 +61,14 @@ function showResult($mode, $timeCommand, $status, $conn){
             $orderText = $mode . $timeCommand;
             if($mode == "RE"){
                 $modeText = "rentorder";
-            }else{
+            }else if($mode == "CU"){
                 $modeText = "customorder";
+            }else{
+                showResult("RE", $timeCommand, $status, $conn);
+                showResult("CU", $timeCommand, $status, $conn);
+                return;
             }
-            $sql_orderSearch = "SELECT * FROM " . $modeText . " WHERE status = '" . $status . "' AND orderID LIKE '" . $orderText . "%'  ORDER BY orderTime DESC";
+            $sql_orderSearch = "SELECT * FROM " . $modeText . " WHERE status = '" . $status . "' AND orderID LIKE '%" . $orderText . "%'  ORDER BY orderTime DESC";
             $orderArray = mysqli_query($conn, $sql_orderSearch);
             if($mode == "RE"){
                 //echo "<script>alert('RE called!');</script>";
