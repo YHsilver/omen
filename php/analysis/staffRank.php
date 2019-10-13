@@ -2,7 +2,7 @@
 
 include "../template/buildConn.php";
 @$conn = getConn();
-mysqli_set_charset($conn, 'utf8');
+
 
 function f_getStaffTable($conn){
     $sql = "SELECT * FROM operator ORDER BY sale DESC";

@@ -74,7 +74,7 @@ $("#rentForm").on("submit", function(ev) {
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     request.onreadystatechange = function () {
         if ((this.status >= 200 && this.status <= 300 || this.status == 304) && this.readyState == 4) {
-            alert(this.responseText);
+            //alert(this.responseText);
             if (this.responseText === "successWithOldClient") {
                 alert("租赁成功")
             }

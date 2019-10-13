@@ -1,5 +1,5 @@
 function finishRentOrder (rentID) {
-    alert("rentOrder Finish");
+    //alert("rentOrder Finish");
     var request = new XMLHttpRequest();
     //rentID = parseInt(rentID);
     if(confirm("确定 完成 该订单？")){

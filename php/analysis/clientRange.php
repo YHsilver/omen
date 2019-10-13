@@ -88,19 +88,27 @@ if($_SESSION['account'] != 'master'){
             <?php
 
                 $sum = count(f_getClientTable($conn));
-                echo "<h4 style=\"margin-top: 45px;\"><strong>客户总数 ：" . $sum . "</strong> </h4>";
+               // echo "<h4 style=\"margin-top: 45px;\"> </h4>";
                 $sourceTable = f_getSourceTable($conn);
+//            $row = mysqli_fetch_all($sourceTable);
+//
+//            $clientTable = f_getClientTable($conn);
+//            $i = 0;
+//            foreach ($clientTable as $currentClient){
+//
+//            }
+                echo "        <div class=\"panel panel-default\">
+            <div class=\"panel-heading \">
+                <p class=\"panel-title \">客户总数 ：" . $sum . " </p>
+            </div>";
+                echo "<table class=\"table table-hover panel-body table-responsive\"><thead><tr><td>客户来源</td><td>人数</td><td>比例</td></tr></thead>";
                 foreach ($sourceTable as $currentSource){
                     //$rate = ($value / $sum) * 100;
-                    echo "<div style='background: #f5f5f5; margin: 5px; opacity: 0.75; padding: 5px;'>";
-                    foreach ($currentSource as $value){
-                            echo "<p> " . $value. "</p>";
-
-                    }
-                    echo "</div>";
+//                    echo "<div style='background: #f5f5f5; margin: 5px; opacity: 0.75; padding: 5px;'>";
+                    echo "<tr><td>" . $currentSource['source'] . "</td><td> " . $currentSource['COUNT(*)'] . "</td> <td> " .sprintf("%01.2f", ($currentSource['COUNT(*)'] / $sum)*100).'%' . "</td></tr>";
 
                 }
-
+                echo "</table></div>";
             ?>
 
         </div>
